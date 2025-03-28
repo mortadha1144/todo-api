@@ -59,20 +59,38 @@ class AuthController extends Controller
             return response()->json($validated->errors(), 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        try {
+            $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+            if (!$user || !$this->checkPassword($request->password, $user->password)) {
+                return response()->json([
+                    'message' => 'email or password is incorrect'
+                ], 401);
+            }
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
             return response()->json([
-                'message' => 'email or password is incorrect'
-            ], 401);
+                'access_token' => $token,
+                'user' => $user
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'something went wrong'
+            ], 500);
         }
+    }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+    /**
+     * Check if user exists and password matches
+     * 
+     * @param User|null $user
+     * @param string $password
+     * @return bool
+     */
+    private function checkPassword(string $requestPassword, string $userPassword): bool
+    {
 
-        return response()->json([
-            'access_token' => $token,
-            'user' => $user
-        ], 200);
-        
+        return Hash::check($requestPassword, $userPassword);
     }
 }
