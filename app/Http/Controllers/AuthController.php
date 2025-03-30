@@ -74,11 +74,18 @@ class AuthController extends Controller
                 'access_token' => $token,
                 'user' => $user
             ], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'something went wrong'
+                'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
     }
 
     /**
