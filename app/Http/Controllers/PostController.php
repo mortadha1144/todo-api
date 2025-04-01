@@ -19,9 +19,9 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->integer('per_page', 10);
-        $posts = Post::paginate($perPage);
+        $posts = Post::with('user', 'comments')->paginate($perPage);
 
-        return new PostCollection($posts);
+        return PostResource::collection($posts);
     }
 
     /**
@@ -45,7 +45,8 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return new PostResource($post);
+        $post = Post::find($post->id)->with('user')->first();
+        return response()->json($post);
     }
 
     /**

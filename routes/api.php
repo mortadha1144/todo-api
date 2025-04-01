@@ -1,12 +1,14 @@
 <?php
 
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TodoController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 
 Route::get('/users/me', function (Request $request) {
     return $request->user();
@@ -34,4 +36,12 @@ Route::get('posts/{post}', [PostController::class, 'show']);
 // Protected routes (require auth)
 Route::apiResource('posts', PostController::class)
     ->except(['index', 'show']) // Exclude both public routes
+    ->middleware('auth:sanctum');
+
+// [Comments] routes
+Route::apiResource('comments', CommentController::class)
+    ->middleware('auth:sanctum');
+
+// [Likes] routes
+Route::apiResource('likes', LikeController::class)
     ->middleware('auth:sanctum');
